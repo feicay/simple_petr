@@ -12,7 +12,7 @@ import yaml
 import cv2
 import numpy as np
 import argparse
-from thop import profile
+# from thop import profile
 import time
 
 parser = argparse.ArgumentParser(description='PyTorch bevdet Testing')
@@ -58,7 +58,7 @@ for i, data_dict in enumerate(valloader):
     t1 = time.time()
     print("inference time: ", (t1 - t0))
     # objs_list = net.decode(pred, grid_conf, hyp['CANONICAL_BOX3D_SIZES'], thresh=0.35)
-    objs_list = net.decode(pred, thresh=0.1)
+    objs_list = net.decode(pred, thresh=0.3)
     print(objs_list[0])
     box3d_preds = box3d_ang_to_box3d_quat(objs_list[0])
     print(box3d_preds.size())

@@ -64,7 +64,7 @@ class PETR(nn.Module):
             nn.Conv2d(1024, 256, kernel_size=1, stride=1, padding=0),
         )
         self.num_decoder_layers = 6
-        self.transformer = Transformer(num_decoder_layers=self.num_decoder_layers)
+        self.transformer = Transformer(num_decoder_layers=self.num_decoder_layers, num_query_position=300) # default 900
         # self.class_embed = nn.Linear(256, cls_num+1) # include background
         # self.bbox_embed = MLP(256, 256, 8, 3)
         self.class_embed = nn.Sequential(
