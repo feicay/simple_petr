@@ -3,7 +3,7 @@ height: 448 #input image height
 backbone: yolo-m  # backbone
 pretrain: False
 num_classes: 10
-lr0: 0.0005  # initial learning rate (SGD=1E-2, Adam=1E-3) total batch=64
+lr0: 0.0002  # initial learning rate (SGD=1E-2, Adam=1E-3) total batch=64
 lrdecay: 0.1
 scheduler: lamda # use step lr scheduler, step or lamda
 lrf: 0.05
