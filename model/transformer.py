@@ -70,10 +70,10 @@ class MLP(nn.Module):
 class TransformerDecoderLayer(nn.Module):
     def __init__(self, d_model=256, d_ffn=1024, dropout=0., activation="relu", n_heads=8):
         super().__init__()
-        # pos3d attention
-        self.pos3d_attn = nn.MultiheadAttention(d_model, n_heads, dropout=dropout)
-        self.dropout0 = nn.Dropout(dropout)
-        self.norm0 = nn.LayerNorm(d_model)
+        # # pos3d attention
+        # self.pos3d_attn = nn.MultiheadAttention(d_model, n_heads, dropout=dropout)
+        # self.dropout0 = nn.Dropout(dropout)
+        # self.norm0 = nn.LayerNorm(d_model)
 
         # cross attention
         self.cross_attn = nn.MultiheadAttention(d_model, n_heads, dropout=dropout)
@@ -93,11 +93,11 @@ class TransformerDecoderLayer(nn.Module):
         return tensor if pos is None else tensor + pos
 
     def forward(self, tgt, srcs, query_pos=None, posemb_3d=None, posemb_2d=None):
-        tgt0 = self.pos3d_attn(self.with_pos_embed(tgt, query_pos).transpose(0, 1),
-                                self.with_pos_embed(posemb_3d, posemb_2d).transpose(0,1),
-                                posemb_3d.transpose(0, 1))[0].transpose(0,1)
-        tgt = tgt + self.dropout0(tgt0)
-        tgt = self.norm0(tgt)
+        # tgt0 = self.pos3d_attn(self.with_pos_embed(tgt, query_pos).transpose(0, 1),
+        #                         self.with_pos_embed(posemb_3d, posemb_2d).transpose(0,1),
+        #                         posemb_3d.transpose(0, 1))[0].transpose(0,1)
+        # tgt = tgt + self.dropout0(tgt0)
+        # tgt = self.norm0(tgt)
         # self attention
         q = k = self.with_pos_embed(tgt, query_pos)
         tgt2 = self.self_attn(q.transpose(0, 1), k.transpose(0, 1), tgt.transpose(0, 1))[0].transpose(0, 1)
