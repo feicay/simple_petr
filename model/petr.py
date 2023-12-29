@@ -51,7 +51,7 @@ class PETR(nn.Module):
         self.depth_conv = nn.Sequential(
             nn.Conv2d(cam_C, 256, 1, 1),
             nn.ReLU(),
-            nn.Conv2d(256, self.D, 1, 1),
+            nn.Conv2d(256, 256, 1, 1),
         )
         self.pos_conv = nn.Sequential(
             nn.Conv2d(self.D * 3, 1024, 1, 1),
@@ -114,29 +114,29 @@ class PETR(nn.Module):
 
         depth_dist = self.depth_conv(x).sigmoid()
 
-        intrins = input['intrins'].clone()
-        intrins[:, :, 0, :] *= ( W / W_raw)
-        intrins[:, :, 1, :] *= ( H / H_raw)
-        img_pos = self.make_coordinate(W, H, self.D, intrins, input['rots'], input['trans'])
-        if self.bev_aug and self.training:
-            bev_rot = input['bev_rot'].view(B, N, 1, 1, 1, 3, 3)
-            img_pos = bev_rot.matmul(img_pos.unsqueeze(-1)).squeeze(-1)
-
         with torch.cuda.amp.autocast(enabled=False):
+            intrins = input['intrins'].clone()
+            intrins[:, :, 0, :] *= ( W / W_raw)
+            intrins[:, :, 1, :] *= ( H / H_raw)
+            img_pos = self.make_coordinate(W, H, self.D, intrins, input['rots'], input['trans'])
+            if self.bev_aug and self.training:
+                bev_rot = input['bev_rot'].view(B, N, 1, 1, 1, 3, 3)
+                img_pos = bev_rot.matmul(img_pos.unsqueeze(-1)).squeeze(-1)
+
             img_pos_norm = self.norm_pos(img_pos) # BxNxDxHxWx3
             img_pos_norm = inverse_sigmoid(img_pos_norm)
-            img_pos_norm = img_pos_norm.permute(0,1,2,5,3,4).contiguous().view(BN,-1,H,W)        
-            pos_emb = self.pos_conv(img_pos_norm)
-            pos_emb = pos_emb * depth_dist
-            pos3d_emb = pos_emb.permute(0,2,3,1) # BN x H x W x C
-            pos3d_emb = pos3d_emb.reshape(B, -1, 256)
+        img_pos_norm = img_pos_norm.permute(0,1,2,5,3,4).contiguous().view(BN,-1,H,W)        
+        pos_emb = self.pos_conv(img_pos_norm)
+        pos_emb = pos_emb * depth_dist
+        pos3d_emb = pos_emb.permute(0,2,3,1) # BN x H x W x C
+        pos3d_emb = pos3d_emb.reshape(B, -1, 256)
 
-            pos2d_feat = sin_positional_encoding3D((B,N,H,W), x.device) # B x N x H x W x 384
-            pos2d_feat = pos2d_feat.permute(0, 1, 4, 2, 3).contiguous().view(BN,-1,H,W)
-            pos2d_feat_emb = self.adapt_pos2d(pos2d_feat)
-            pos2d_feat_emb = pos2d_feat_emb.permute(0,2,3,1)
-            pos2d_feat_emb = pos2d_feat_emb.reshape(B, -1, 256)
-            pos3d = pos3d_emb + pos2d_feat_emb
+        pos2d_feat = sin_positional_encoding3D((B,N,H,W), x.device) # B x N x H x W x 384
+        pos2d_feat = pos2d_feat.permute(0, 1, 4, 2, 3).contiguous().view(BN,-1,H,W)
+        pos2d_feat_emb = self.adapt_pos2d(pos2d_feat)
+        pos2d_feat_emb = pos2d_feat_emb.permute(0,2,3,1)
+        pos2d_feat_emb = pos2d_feat_emb.reshape(B, -1, 256)
+        pos3d = pos3d_emb + pos2d_feat_emb
 
         outputs, reference_points = self.transformer(feat2d, posemb_3d=pos3d, posemb_2d=pos2d_feat_emb)
         loss_aux = 0
