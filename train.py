@@ -26,8 +26,8 @@ parser.add_argument('--logdir', default='./runs', type=str, help='resume checkpo
 parser.add_argument('--hyp', default='config/hyp.petr.nusc.yaml', type=str, help='learning rate')
 parser.add_argument('--half', default=0, type=int, help='using half precision training')
 parser.add_argument('--adam', default=1, type=int, help='use adam optimizer')
-parser.add_argument('--workers', default=4, type=int, help='image height')
-parser.add_argument('--batch', default=8, type=int, help='batch size')
+parser.add_argument('--workers', default=0, type=int, help='image height')
+parser.add_argument('--batch', default=2, type=int, help='batch size') # default 4 gpus, batch=2 per gpu
 parser.add_argument('--detdir', default='/data/04_dataset/nuScenes/nuscenes', type=str, help='detection dataset dir')
 parser.add_argument('--disturl', default='tcp://localhost:23456', type=str, help='torch distributed node0 IP and port')
 parser.add_argument('--worldsize', default=1, type=int, help='the number of machines for distributed training')
