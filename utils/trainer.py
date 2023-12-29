@@ -98,7 +98,7 @@ class Trainer(object):
         self.random_resize = random_resize
         self.width = self.hyp['width']
         self.height = self.hyp['height']
-        self.max_warmup_iter = min(round(hyp['warmup_epochs'] * len(trainLoader)), 3000)
+        self.max_warmup_iter = min(round(hyp['warmup_epochs'] * len(trainLoader)), 1000)
 
         if self.rank == 0:
             save_dir = os.path.join(args.logdir, self.netname)
