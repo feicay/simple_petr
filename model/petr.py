@@ -6,7 +6,7 @@ from model.network_blocks import BaseConv
 from model.transformer import Transformer, MLP, inverse_sigmoid
 from model.matcher import HungarianMatcher
 from model.loss import sigmoid_focal_loss
-from geometry.nms3d import nms3d, nms_distance
+# from geometry.nms3d import nms3d, nms_distance
 import copy
 import math
 
